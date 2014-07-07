@@ -26,13 +26,7 @@ class SingleSignOn_Server
      * 
      * @var array
      */
-    protected static $brokers = array(
-        'ALEX' => array('secret'=>"abc123"),
-        'BINCK' => array('secret'=>"xyz789"),
-		'UZZA' => array('secret'=>"rino222"),
-        'AJAX' => array('secret'=>"amsterdam"),
-        'LYNX' => array('secret'=>"klm345"),
-    );
+    protected static $brokers = array();
 
     /**
      * Information of the users.
@@ -40,12 +34,7 @@ class SingleSignOn_Server
      * 
      * @var array
      */
-    protected static $users = array(
-        'jan' => array('password'=>"jan1", 'fullname'=>"Jan Smit", 'email'=>"jan@smit.nl"),
-        'peter' => array('password'=>"peter1", 'fullname'=>"Peter de Vries", 'email'=>"peter.r.de-vries@sbs.nl"),
-        'bart' => array('password'=>"bart1", 'fullname'=>"Bart de Graaf", 'email'=>"graaf@bnn.info"),
-        'henk' => array('password'=>"henk1", 'fullname'=>"Henk Westbroek", 'email'=>"henk@amsterdam.com")
-    );
+    protected static $users = array();
     
     /**
      * The current broker
@@ -57,9 +46,65 @@ class SingleSignOn_Server
     /**
      * Class constructor.
      */
-    public function __construct()
+    public function __construct($attributes=null)
     {
     	if (!function_exists('symlink')) $this->links_path = sys_get_temp_dir();
+
+        if(isset($attributes) && is_array($attributes)) {
+            foreach ($attributes as $key => $val) {
+                if(method_exists($this, 'set'.ucfirst($key))) {
+                    $this->{'set'.ucfirst($key)}($val);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set broker
+     *
+     * @param mixed $name
+     * @param mixed $attributes
+     *
+     * @return $this
+     */
+    protected function setBroker($name, $attributes=null)
+    {
+        if(is_array($name)) {
+            foreach($name as $key => $val) {
+                $this->setBroker($key, $val);
+            }
+            return $this;
+        }
+
+        if (!array_key_exists($name, self::$brokers)) {
+            array_push(self::$brokers, array($name => $attributes));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set a user
+     *
+     * @param mixed $name
+     * @param null  $attributes
+     *
+     * @return $this
+     */
+    protected function setUser($name, $attributes=null)
+    {
+        if(is_array($name)) {
+            foreach($name as $key => $val) {
+                $this->setUser($key, $val);
+            }
+            return $this;
+        }
+
+        if (!array_key_exists($name, self::$users)) {
+            array_push(self::$users, array($name => $attributes));
+        }
+
+        return $this;
     }
     
     /**
@@ -238,10 +283,4 @@ class SingleSignOn_Server
         echo $message;
         exit;
     }
-}
-
-// Execute controller command
-if (realpath($_SERVER["SCRIPT_FILENAME"]) == realpath(__FILE__) && isset($_GET['cmd'])) {
-    $ctl = new SingleSignOn_Server();
-    $ctl->$_GET['cmd']();
 }
