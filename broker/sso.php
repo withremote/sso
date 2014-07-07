@@ -95,14 +95,16 @@ class SingleSignOn_Broker
 		$token = $this->getSessionToken();
 		$checksum = md5("attach{$token}{$_SERVER['REMOTE_ADDR']}{$this->secret}");
         return "{$this->url}?cmd=attach&broker={$this->broker}&token=$token&checksum=$checksum";
-    }    
-    
-    
+    }
+
+
     /**
      * Login at sso server.
-     * 
+     *
      * @param string $username
      * @param string $password
+     *
+     * @throws Exception
      * @return boolean
      */
     public function login($username=null, $password=null)
@@ -189,13 +191,15 @@ class SingleSignOn_Broker
     	
     	echo '</user>';
     }
-    
+
 
     /**
      * Execute on SSO server.
      *
-     * @param string $cmd   Command
-     * @param array  $vars  Post variables
+     * @param string $cmd  Command
+     * @param array  $vars Post variables
+     *
+     * @throws Exception
      * @return array
      */
     protected function serverCmd($cmd, $vars=null)

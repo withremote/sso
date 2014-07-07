@@ -102,10 +102,14 @@ class SingleSignOn_Server
         if (isset($_SESSION['client_addr']) && $_SESSION['client_addr'] != $_SERVER['REMOTE_ADDR']) session_regenerate_id(true);
         if (!isset($_SESSION['client_addr'])) $_SESSION['client_addr'] = $_SERVER['REMOTE_ADDR'];
     }
-    
+
     /**
      * Generate session id from session token
-     * 
+     *
+     * @param      $broker
+     * @param      $token
+     * @param null $client_addr
+     *
      * @return string
      */
     protected function generateSessionId($broker, $token, $client_addr=null)
@@ -115,10 +119,13 @@ class SingleSignOn_Server
         if (!isset($client_addr)) $client_addr = $_SERVER['REMOTE_ADDR'];
         return "SSO-{$broker}-{$token}-" . md5('session' . $token . $client_addr . self::$brokers[$broker]['secret']);
     }
-    
+
     /**
      * Generate session id from session token
-     * 
+     *
+     * @param $broker
+     * @param $token
+     *
      * @return string
      */
     protected function generateAttachChecksum($broker, $token)
@@ -168,11 +175,13 @@ class SingleSignOn_Server
         if (!isset($this->links_path)) {
 	        $link = (session_save_path() ? session_save_path() : sys_get_temp_dir()) . "/sess_" . $this->generateSessionId($_REQUEST['broker'], $_REQUEST['token']);
 	        if (!file_exists($link)) $attached = symlink('sess_' . session_id(), $link);
-	        if (!$attached) trigger_error("Failed to attach; Symlink wasn't created.", E_USER_ERROR);
+            /** @var $attached mixed */
+            if (!$attached) trigger_error("Failed to attach; Symlink wasn't created.", E_USER_ERROR);
         } else {
 	        $link = "{$this->links_path}/" . $this->generateSessionId($_REQUEST['broker'], $_REQUEST['token']);
 	        if (!file_exists($link)) $attached = file_put_contents($link, session_id());
-	        if (!$attached) trigger_error("Failed to attach; Link file wasn't created.", E_USER_ERROR);
+            /** @var $attached mixed */
+            if (!$attached) trigger_error("Failed to attach; Link file wasn't created.", E_USER_ERROR);
 		}
 
         if (isset($_REQUEST['redirect'])) {
