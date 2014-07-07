@@ -44,19 +44,66 @@ class SingleSignOn_Broker
      * @var array
      */
     protected $userinfo;
-    
-    
+
+
     /**
      * Class constructor
+     *
+     * @param $auto_attach bool
+     * @param $attributes  mixed
      */
-    public function __construct($auto_attach=true)
+    public function __construct($auto_attach=true, $attributes=null)
     {
         if (isset($_COOKIE['session_token'])) $this->sessionToken = $_COOKIE['session_token'];
-        
+
+        if (is_array($attributes)) {
+            foreach ($attributes as $key => $value) {
+                if (method_exists($this, 'set'.ucfirst($key))) {
+                    $this->{'set'.ucfirst($key)}($value);
+                }
+            }
+        }
+
         if ($auto_attach && !isset($this->sessionToken)) {
             header("Location: " . $this->getAttachUrl() . "&redirect=". urlencode("http://{$_SERVER["SERVER_NAME"]}{$_SERVER["REQUEST_URI"]}"), true, 307);
             exit;
         }
+    }
+
+    /**
+     * Set url path to sso server
+     * @param $url
+     *
+     * @return $this
+     */
+    protected function setUrl($url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * Set broker name
+     * @param $broker
+     *
+     * @return $this
+     */
+    protected function setBroker($broker)
+    {
+        $this->broker = $broker;
+        return $this;
+    }
+
+    /**
+     * set secret broker string
+     * @param $secret
+     *
+     * @return $this
+     */
+    protected function setSecret($secret)
+    {
+        $this->secret = $secret;
+        return $this;
     }
     
     /**
@@ -226,7 +273,7 @@ class SingleSignOn_Broker
 // Execute controller command
 if (realpath($_SERVER["SCRIPT_FILENAME"]) == realpath(__FILE__) && isset($_GET['cmd'])) {
     $ctl = new SingleSignOn_Broker(false);
-	$ctl->pass401 = true;
+    $ctl->pass401 = true;
     $ret = $ctl->$_GET['cmd']();
 
     if (is_scalar($ret)) echo $ret;
