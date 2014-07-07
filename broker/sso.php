@@ -68,7 +68,7 @@ class SingleSignOn_Broker
     {
         if (!isset($this->sessionToken)) {
             $this->sessionToken = md5(uniqid(rand(), true));
-            setcookie('session_token', $this->sessionToken, time() + $this->sessionExpire);
+            setcookie('session_token', $this->sessionToken, time()+intval($this->sessionExpire));
         }
         
         return $this->sessionToken;
