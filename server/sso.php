@@ -50,7 +50,7 @@ class SingleSignOn_Server
     {
     	if (!function_exists('symlink')) $this->links_path = sys_get_temp_dir();
 
-        if(isset($attributes) && is_array($attributes)) {
+        if(is_array($attributes) && count($attributes) > 0) {
             foreach ($attributes as $key => $val) {
                 if(method_exists($this, 'set'.ucfirst($key))) {
                     $this->{'set'.ucfirst($key)}($val);

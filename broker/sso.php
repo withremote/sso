@@ -56,7 +56,7 @@ class SingleSignOn_Broker
     {
         if (isset($_COOKIE['session_token'])) $this->sessionToken = $_COOKIE['session_token'];
 
-        if (is_array($attributes)) {
+        if (is_array($attributes) && count($attributes) > 0) {
             foreach ($attributes as $key => $value) {
                 if (method_exists($this, 'set'.ucfirst($key))) {
                     $this->{'set'.ucfirst($key)}($value);
